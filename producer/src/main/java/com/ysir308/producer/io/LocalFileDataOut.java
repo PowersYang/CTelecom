@@ -31,6 +31,7 @@ public class LocalFileDataOut implements DataOut {
 
     /**
      * 将数据写入文件
+     *
      * @param data
      * @throws Exception
      */
@@ -42,7 +43,7 @@ public class LocalFileDataOut implements DataOut {
 
     @Override
     public void close() throws IOException {
-        if (writer != null){
+        if (writer != null) {
             writer.close();
         }
     }

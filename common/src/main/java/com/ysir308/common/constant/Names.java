@@ -21,12 +21,12 @@ public enum Names implements Val {
     }
 
     @Override
-    public void setValue(Object value) {
-        this.name = (String) value;
+    public String getValue() {
+        return name;
     }
 
     @Override
-    public String getValue() {
-        return name;
+    public void setValue(Object value) {
+        this.name = (String) value;
     }
 }

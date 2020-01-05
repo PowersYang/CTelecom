@@ -22,7 +22,6 @@ public class Calllog {
     private String flg = "1";
 
 
-
     public Calllog() {
 
     }

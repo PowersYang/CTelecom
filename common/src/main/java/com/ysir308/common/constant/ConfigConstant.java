@@ -18,7 +18,7 @@ public class ConfigConstant {
         }
     }
 
-    public static String getValue(String key){
+    public static String getValue(String key) {
         return valueMap.get(key);
     }
 }

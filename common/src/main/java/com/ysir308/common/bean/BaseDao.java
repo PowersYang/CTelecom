@@ -25,6 +25,31 @@ public abstract class BaseDao {
     private ThreadLocal<Connection> connHolder = new ThreadLocal<>();
     private ThreadLocal<Admin> adminHolder = new ThreadLocal<>();
 
+    /**
+     * 计算分区号
+     *
+     * @param tel
+     * @param date
+     * @return
+     */
+    protected static int genRegionNum(String tel, String date) {
+        // 13988886666
+        String usercode = tel.substring(tel.length() - 4);
+        // 201901011212
+        String yearMonth = date.substring(0, 6);
+
+        int userCodeHash = usercode.hashCode();
+        int yearMonthHash = yearMonth.hashCode();
+
+        // CRC校验采用异或算法
+        int crc = Math.abs(userCodeHash ^ yearMonthHash);
+
+        // 取模
+        int regionNum = crc % ValueConstant.REGION_COUNT;
+
+        return regionNum;
+    }
+
     protected void start() throws IOException {
         getConnection();
         getAdmin();
@@ -152,31 +177,6 @@ public abstract class BaseDao {
         }
 
         return rowkeyss;
-    }
-
-    /**
-     * 计算分区号
-     *
-     * @param tel
-     * @param date
-     * @return
-     */
-    protected static int genRegionNum(String tel, String date) {
-        // 13988886666
-        String usercode = tel.substring(tel.length() - 4);
-        // 201901011212
-        String yearMonth = date.substring(0, 6);
-
-        int userCodeHash = usercode.hashCode();
-        int yearMonthHash = yearMonth.hashCode();
-
-        // CRC校验采用异或算法
-        int crc = Math.abs(userCodeHash ^ yearMonthHash);
-
-        // 取模
-        int regionNum = crc % ValueConstant.REGION_COUNT;
-
-        return regionNum;
     }
 
     /**

@@ -7,7 +7,7 @@ public class CallLog {
     private String callTime;
     private String duration;
 
-    public CallLog(String call1, String call2, String callTime, String duration){
+    public CallLog(String call1, String call2, String callTime, String duration) {
         this.call1 = call1;
         this.call2 = call2;
         this.callTime = callTime;
