@@ -39,9 +39,6 @@ public class LocalFileProducer implements Producer {
         // 读取通讯录数据
         try {
             List<Contact> contacts = in.read(Contact.class);
-            for (Contact contact : contacts) {
-                System.out.println(contact);
-            }
 
             while (flag) {
                 // 从通讯录中随机查找两个电话号码（主叫和被叫）

@@ -7,7 +7,10 @@ import com.ysir308.common.bean.Val;
  */
 public enum Names implements Val {
 
-    NAMESPACE("ysir308");
+    NAMESPACE("ct"),
+    TABLE("ct:calllog"),
+    CF_CALLER("caller"),
+    TOPIC("calllog");
 
     private String name;
 
@@ -21,7 +24,7 @@ public enum Names implements Val {
     }
 
     @Override
-    public Object getValue() {
-        return null;
+    public String getValue() {
+        return name;
     }
 }
