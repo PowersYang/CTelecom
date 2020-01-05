@@ -23,7 +23,7 @@
 <configuration>
 	<property>     
 		<name>hbase.rootdir</name>     
-		<value>hdfs://linux1:9000/hbase</value>   
+		<value>hdfs://localhost:9000/HBase</value>
 	</property>
 
 	<property>   
@@ -39,11 +39,11 @@
 
 	<property>   
 		<name>hbase.zookeeper.quorum</name>
-	     <value>linux1:2181,linux2:2181,linux3:2181</value>
+	     <value>localhost:2181</value>
 	</property>
 
 	<property>   
 		<name>hbase.zookeeper.property.dataDir</name>
-	     <value>/opt/module/zookeeper/zkdata</value>
+	     <value>/opt/module/zookeeper-3.4.10/zkData</value>
 	</property>
 </configuration>

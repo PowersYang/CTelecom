@@ -40,11 +40,13 @@ public class CalllogConsumer implements Consumer {
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(100);
                 for (ConsumerRecord<String, String> record : records) {
-                    System.out.println(record.key() + "\t" + record.value());
-                    dao.insertDatas(record.value());
+                    System.out.println(record.value());
+//                    dao.insertDatas(record.value());
+                    Calllog log = new Calllog(record.value());
+                    dao.insertData(log);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
