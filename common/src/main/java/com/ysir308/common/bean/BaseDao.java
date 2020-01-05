@@ -5,6 +5,7 @@ import com.ysir308.common.api.Rowkey;
 import com.ysir308.common.api.TableRef;
 import com.ysir308.common.constant.Names;
 import com.ysir308.common.constant.ValueConstant;
+import com.ysir308.common.util.DateUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
@@ -13,6 +14,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -68,10 +70,10 @@ public abstract class BaseDao {
      * @throws IOException
      */
     protected void createTableXX(String name, String... families) throws IOException {
-        createTableXX(name, null, families);
+        createTableXX(name, null, null, families);
     }
 
-    protected void createTableXX(String name, Integer regionCount, String... families) throws IOException {
+    protected void createTableXX(String name, String coprocessorClass, Integer regionCount, String... families) throws IOException {
         Admin admin = getAdmin();
 
         TableName tableName = TableName.valueOf(name);
@@ -80,11 +82,11 @@ public abstract class BaseDao {
             deleteTable(name);
         }
 
-        createTable(name, regionCount, families);
+        createTable(name, coprocessorClass, regionCount, families);
 
     }
 
-    private void createTable(String tableName, Integer regionCount, String... families) throws IOException {
+    private void createTable(String tableName, String coprocessorClass, Integer regionCount, String... families) throws IOException {
         Admin admin = getAdmin();
         HTableDescriptor descriptors = new HTableDescriptor(tableName);
 
@@ -98,6 +100,10 @@ public abstract class BaseDao {
             descriptors.addFamily(columnDescriptor);
         }
 
+        if (coprocessorClass != null && !"".equals(coprocessorClass)) {
+            descriptors.addCoprocessor(coprocessorClass);
+        }
+
         // 增加预分区
         if (regionCount == null || regionCount <= 1) {
             admin.createTable(descriptors);
@@ -106,6 +112,46 @@ public abstract class BaseDao {
             byte[][] splitKeys = genSplitKeys(regionCount);
             admin.createTable(descriptors, splitKeys);
         }
+    }
+
+    /**
+     * 获取查询时的startrow和stoprow的集合
+     *
+     * @param tel
+     * @param start
+     * @param end
+     * @return
+     */
+    protected List<String[]> getStartStopRowkeys(String tel, String start, String end) {
+        List<String[]> rowkeyss = new ArrayList<>();
+
+        String startTime = start.substring(0, 6);
+        String endTime = end.substring(0, 6);
+
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(DateUtil.parse(startTime, "yyyyMM"));
+
+        Calendar endCal = Calendar.getInstance();
+        endCal.setTime(DateUtil.parse(endTime, "yyyyMM"));
+
+        while (startCal.getTimeInMillis() <= endCal.getTimeInMillis()) {
+
+            // 当前循环的月份
+            String nowTime = DateUtil.format(startCal.getTime(), "yyyyMM");
+
+            int regionNum = genRegionNum(tel, nowTime);
+
+            String startRow = regionNum + "_" + tel + "_" + nowTime;
+            String stopRow = startRow + "|";
+
+            String[] rowkey = {startRow, stopRow};
+            rowkeyss.add(rowkey);
+
+            // 月份加1
+            startCal.add(Calendar.MONTH, 1);
+        }
+
+        return rowkeyss;
     }
 
     /**
@@ -169,6 +215,24 @@ public abstract class BaseDao {
 
         // 增加数据
         table.put(put);
+
+        // 关闭表
+        table.close();
+    }
+
+    /**
+     * 增加多条数据
+     *
+     * @param name
+     * @param puts
+     */
+    protected void putData(String name, List<Put> puts) throws IOException {
+        // 获取表对象
+        Connection conn = getConnection();
+        Table table = conn.getTable(TableName.valueOf(name));
+
+        // 增加数据
+        table.put(puts);
 
         // 关闭表
         table.close();

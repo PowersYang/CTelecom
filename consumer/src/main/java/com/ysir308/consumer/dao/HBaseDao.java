@@ -8,6 +8,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * HBase的访问对象
@@ -21,7 +23,7 @@ public class HBaseDao extends BaseDao {
         start();
 
         createNamespaceNX(Names.NAMESPACE.getValue());
-        createTableXX(Names.TABLE.getValue(), ValueConstant.REGION_COUNT, Names.CF_CALLER.getValue());
+        createTableXX(Names.TABLE.getValue(), "com.ysir308.consumer.coprocessor.InsertCalleeCoprocessor", ValueConstant.REGION_COUNT, Names.CF_CALLER.getValue(), Names.CF_CALLEE.getValue());
 
         end();
     }
@@ -65,18 +67,31 @@ public class HBaseDao extends BaseDao {
         //      3-3、计算分区号
 
         // rowKey = regionNum + call1 + time + call2 + duration
-        int regionNum = genRegionNum(call1, calltime);
-        String rowkey = regionNum + "_" + call1 + "_" + calltime + "_" + call2 + "_" + duration;
-
+        // 主叫用户
+        String rowkey = genRegionNum(call1, calltime) + "_" + call1 + "_" + calltime + "_" + call2 + "_" + duration + "_1";
         Put put = new Put(Bytes.toBytes(rowkey));
         byte[] family = Bytes.toBytes(Names.CF_CALLER.getValue());
         put.addColumn(family, Bytes.toBytes("call1"), Bytes.toBytes(call1));
         put.addColumn(family, Bytes.toBytes("call2"), Bytes.toBytes(call2));
         put.addColumn(family, Bytes.toBytes("calltime"), Bytes.toBytes(calltime));
         put.addColumn(family, Bytes.toBytes("duration"), Bytes.toBytes(duration));
+        put.addColumn(family, Bytes.toBytes("flg"), Bytes.toBytes("1"));
 
+        // 被叫用户
+//        String calleeRowkey = genRegionNum(call2, calltime) + "_" + call2 + "_" + calltime + "_" + call1 + "_" + duration + "_0";
+//        Put calleePut = new Put(Bytes.toBytes(calleeRowkey));
+//        byte[] calleeFamily = Bytes.toBytes(Names.CF_CALLEE.getValue());
+//        calleePut.addColumn(calleeFamily, Bytes.toBytes("call1"), Bytes.toBytes(call2));
+//        calleePut.addColumn(calleeFamily, Bytes.toBytes("call2"), Bytes.toBytes(call1));
+//        calleePut.addColumn(calleeFamily, Bytes.toBytes("calltime"), Bytes.toBytes(calltime));
+//        calleePut.addColumn(calleeFamily, Bytes.toBytes("duration"), Bytes.toBytes(duration));
+//        calleePut.addColumn(calleeFamily, Bytes.toBytes("flg"), Bytes.toBytes("0"));
 
         // 3、保存数据
-        putData(Names.TABLE.getValue(), put);
+        List<Put> puts = new ArrayList<>();
+        puts.add(put);
+//        puts.add(calleePut);
+
+        putData(Names.TABLE.getValue(), puts);
     }
 }

@@ -9,18 +9,19 @@ public class Calllog {
 
     @Rowkey
     private String rowkey;
-
     @Column(family = "caller")
     private String call1;
-
     @Column(family = "caller")
     private String call2;
-
     @Column(family = "caller")
     private String calltime;
-
     @Column(family = "caller")
     private String duration;
+    // 1表示主叫，0表示被叫
+    @Column(family = "caller")
+    private String flg = "1";
+
+
 
     public Calllog() {
 
