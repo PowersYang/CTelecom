@@ -6,10 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="consumer" />
-        <module name="common" />
         <module name="consumer-coprocessor" />
+        <module name="common" />
+        <module name="cache" />
+        <module name="analysis" />
         <module name="producer" />
+        <module name="consumer" />
       </profile>
     </annotationProcessing>
   </component>
