@@ -15,6 +15,7 @@
         <module>consumer-coprocessor</module>
         <module>analysis</module>
         <module>cache</module>
+        <module>web</module>
     </modules>
 
     <build>
