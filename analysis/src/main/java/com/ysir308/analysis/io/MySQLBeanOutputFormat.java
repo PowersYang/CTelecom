@@ -1,8 +1,9 @@
 package com.ysir308.analysis.io;
 
+import com.ysir308.analysis.kv.AnalysisKey;
+import com.ysir308.analysis.kv.AnalysisValue;
 import com.ysir308.common.util.JDBCUtil;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.*;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -18,13 +19,13 @@ import java.util.Map;
 /**
  * MySQL数据格式化输入对象
  */
-public class MySQLTextOutputFormat extends OutputFormat<Text, Text> {
+public class MySQLBeanOutputFormat extends OutputFormat<AnalysisKey, AnalysisValue> {
 
-    protected static class MySQLRecordWriter extends RecordWriter<Text, Text> {
+    protected static class MySQLRecordWriter extends RecordWriter<AnalysisKey, AnalysisValue> {
 
         private Connection connection = null;
-        Map<String, Integer> userMap = new HashMap<String, Integer>();
-        Map<String, Integer> dateMap = new HashMap<String, Integer>();
+        Map<String, Integer> userMap = new HashMap<>();
+        Map<String, Integer> dateMap = new HashMap<>();
 
         public MySQLRecordWriter() {
             // 获取资源
@@ -90,27 +91,17 @@ public class MySQLTextOutputFormat extends OutputFormat<Text, Text> {
          * @throws IOException
          * @throws InterruptedException
          */
-        public void write(Text key, Text value) throws IOException, InterruptedException {
-
-            String[] values = value.toString().split("_");
-            String sumCall = values[0];
-            String sumDuration = values[1];
+        public void write(AnalysisKey key, AnalysisValue value) throws IOException, InterruptedException {
 
             PreparedStatement pstat = null;
             try {
                 String insertSQL = "insert into ct_call ( telid, dateid, sumcall, sumduration ) values ( ?, ?, ?, ? )";
                 pstat = connection.prepareStatement(insertSQL);
 
-                String k = key.toString();
-                String[] ks = k.split("_");
-
-                String tel = ks[0];
-                String date = ks[1];
-
-                pstat.setInt(1, userMap.get(tel));
-                pstat.setInt(2, dateMap.get(date));
-                pstat.setInt(3, Integer.parseInt(sumCall));
-                pstat.setInt(4, Integer.parseInt(sumDuration));
+                pstat.setInt(1, userMap.get(key.getTel()));
+                pstat.setInt(2, dateMap.get(key.getDate()));
+                pstat.setInt(3, Integer.parseInt(value.getSumCall()));
+                pstat.setInt(4, Integer.parseInt(value.getSumDuration()));
                 pstat.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -143,7 +134,7 @@ public class MySQLTextOutputFormat extends OutputFormat<Text, Text> {
         }
     }
 
-    public RecordWriter<Text, Text> getRecordWriter(TaskAttemptContext context) throws IOException, InterruptedException {
+    public RecordWriter<AnalysisKey, AnalysisValue> getRecordWriter(TaskAttemptContext context) throws IOException, InterruptedException {
         return new MySQLRecordWriter();
     }
 
