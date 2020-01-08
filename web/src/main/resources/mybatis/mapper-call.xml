@@ -2,7 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ysir308.web.dao.CalllogDao" >
 
-    <select id="queryDatas" resultType="com.ysir308.web.bean.Calllog">
-        select * from t_call
+
+    <select id="queryMonthDatas" resultType="com.ysir308.web.bean.Calllog">
+        select * from ct_call where telid = (
+            SELECT
+                ID
+            from ct_user
+            where tel = #{tel}
+        ) and dateid in (
+            SELECT
+                ID
+            from ct_date
+            where year = #{year} and month != '' and day = ''
+        )
     </select>
+
 </mapper>

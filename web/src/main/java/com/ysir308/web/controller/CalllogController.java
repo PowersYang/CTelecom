@@ -1,13 +1,13 @@
 package com.ysir308.web.controller;
 
+import com.ysir308.web.bean.Calllog;
 import com.ysir308.web.service.CalllogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Controller
 public class CalllogController {
@@ -21,16 +21,11 @@ public class CalllogController {
         return "query";
     }
 
-    @ResponseBody
     @RequestMapping("/view")
-    public Object view() {
-        Map<String, String> dataMap = new HashMap<>();
-
-        dataMap.put("username", "张三");
-        dataMap.put("age", "20");
-
-        return dataMap;
+    public Object view(String tel, String calltime, Model model) {
+        // 查询统计结果
+        List<Calllog> logs = calllogService.queryMonthDatas(tel, calltime);
+        model.addAttribute("calllogs", logs);
+        return "view";
     }
-
-
 }
